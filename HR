@@ -1,0 +1,259 @@
+2 Installing Sample Schemas
+During a complete installation of your Oracle Database, the sample schemas can be installed automatically with the seed database. If the seed database is removed from the system, you will need to reinstall the sample schemas before you can perform the steps given in the examples that you find in Oracle documentation and training materials.
+
+This chapter describes how to install Product_Name. It contains the following sections:
+
+Using the Database Configuration Assistant
+Manually Installing Sample Schemas
+Resetting Sample Schemas
+Caution:
+By installing any of the Oracle Database sample schemas, you will destroy any previously installed schemas that use any of the following user names: HR, OE, PM, SH, IX, BI.
+Data contained in any of these schemas will be lost if you run any of the installation scripts described in this section. You should not use the sample schemas for your personal or business data and applications. They are meant to be used for demonstration purposes only.
+
+Using the Database Configuration Assistant
+When you install Oracle Database with the Oracle Universal Installer, the sample schemas are installed by default if you select the Basic Installation option. Selecting the sample schemas option installs all sample schemas (HR, OE, PM, SH, IX) in the database. If you choose not to install the sample schemas at that time, you can add them later by following the instructions in section "Manually Installing Sample Schemas".
+
+At the end of the installation process, a dialog box displays the accounts that have been created and their lock status. By default, all sample schemas are locked and their passwords are expired. Before you can use a locked account, you must unlock it and reset its password. You can unlock the accounts at this point in the installation process. Alternatively, after the installation completes, you can unlock the schemas and reset their passwords by using the ALTER USER ... ACCOUNT UNLOCK statement. For example:
+
+ALTER USER hr ACCOUNT UNLOCK IDENTIFIED BY Password;
+See Also:
+"Guidelines for Securing Passwords" in Oracle Database Security Guide for guidelines related to creating secure passwords
+The sample schemas available to you depend on the edition of Oracle Database that you have installed and its configuration. Refer to the following table:
+
+Schema	Oracle Database Personal edition	Oracle Database Standard edition	Oracle Database Enterprise edition
+HR	OK	OK	OK
+OE	OK	OK	OK
+PM	OK	OK	OK
+IX	OK	OK	OK
+SH	Not available	Not available	Needs Partitioning Option installed
+ 
+Manually Installing Sample Schemas
+If you decide not to install the sample schemas at the time of your initial database installation using DBCA, then you can also create the sample schemas manually by running SQL scripts. Install Oracle Database Examples (Companion CD, part of the media kit) to include these scripts in the demo directory under $ORACLE_HOME.
+
+See Also:
+Oracle Database Examples Installation Guide for download and installation information
+Schema Dependencies
+Various dependencies have been established among the schemas. So, when you create the schemas manually, you must create them in the following order: HR, OE, PM, IX, and SH.
+
+Use this sequence to create the schemas:
+
+Create schema HR.
+
+Create schema OE. Schema HR is already present, and you must know the password for schema HR to grant HR object privileges to OE. Some HR tables are visible to user OE with the use of private synonyms. In addition, some OE tables have foreign key relationships to HR tables.
+
+Create schema PM: Foreign key relationships require that schema OE already exist when schema PM is created. You must know the password for OE, to grant to PM the right to establish and use these foreign keys.
+
+Note:
+Schema PM requires that the database be enabled for the Java Virtual Machine (JVM) and interMedia. You can accomplish this during installation or later using the DBCA.
+Create schema IX: The information exchange schema, IX, is based on order entry data in schema OE. Again, foreign key relationships require that schema OE already be present when schema IX is created. You must know the password for OE to grant to IX, the right to establish and use the foreign keys.
+
+Create schema SH. Schema SH logically depends on schema OE, but you can create schema SH without creating the other four schemas.
+
+Guidelines for Installing Sample Schemas
+All scripts necessary to install sample schemas reside in $ORACLE_HOME/demo/schema directory. Before you install sample schemas by running these scripts, follow these guidelines:
+
+You must connect as a system administrator using the SYSDBA privilege.
+
+When prompted to enter a password for the schema, enter a secure password that meets the requirements described in Oracle Database Security Guide.
+
+When prompted for tablespace names while running scripts:
+
+Enter an appropriate tablespace name, for example, users as the default tablespace for a schema
+
+Enter temp as the temporary tablespace for a schema
+
+When prompted for the log directory name, enter $ORACLE_HOME/demo/schema/log/ or any other existing directory name.
+
+Note:
+Make sure that you end the log directory name with a trailing slash, for example, $ORACLE_HOME/demo/schema/log/
+Installing the HR Schema
+All scripts necessary to create the Human Resource (HR) schema reside in $ORACLE_HOME/demo/schema/human_resources.
+
+You need to call only one script, hr_main.sql, to create all the objects and load the data. The following steps provide a summary of the installation process:
+
+Log on to SQL*Plus as SYS and connect using the AS SYSDBA privilege.
+
+sqlplus connect sys as sysdba
+Enter password: password
+To run the hr_main.sql script, use the following command:
+
+SQL> @?/demo/schema/human_resources/hr_main.sql
+Enter a secure password for HR
+
+specify password for HR as parameter 1:
+Enter value for 1:
+See Also:
+Oracle Database Security Guide for the minimum password requirements
+Enter an appropriate tablespace, for example, users as the default tablespace for HR
+
+specify default tablespace for HR as parameter 2:
+Enter value for 2:
+Enter temp as the temporary tablespace for HR
+
+specify temporary tablespace for HR as parameter 3:
+Enter value for 3:
+Enter your SYS password
+
+specify password for SYS as parameter 4:
+Enter value for 4:
+Enter the directory path, for example, $ORACLE_HOME/demo/schema/log/, for your log directory
+
+specify log path as parameter 5:
+Enter value for 5:
+After script hr_main.sql runs successfully and schema HR is installed, you are connected as user HR. To verify that the schema was created, use the following command:
+
+SQL> SELECT       table_name FROM user_tables;
+Running hr_main.sql accomplishes the following tasks:
+
+Removes any previously installed HR schema
+Creates user HR and grants the necessary privileges
+Connects as HR
+Calls the scripts that create and populate the schema objects
+For a complete listing of the scripts and their functions, refer to Table 4-1.
+
+A pair of optional scripts, hr_dn_c.sql and hr_dn_d.sql, is provided as a schema extension. To prepare schema HR for use with the directory capabilities of Oracle Internet Directory, run the hr_dn_c.sql script. If you want to return to the initial setup of schema HR, use script hr_dn_d.sql to undo the effects of script hr_dn_c.sql.
+
+You can use script hr_drop.sql to drop schema HR.
+
+Installing Schema OE and Subschema OC
+All scripts necessary to create the Order Entry (OE) schema and its Online Catalog (OC) subschema reside in $ORACLE_HOME/demo/schema/order_entry.
+
+See Also:
+Guidelines for Installing Sample Schemas before you run oe_main.sql
+You need to call only one script, oe_main.sql, to create all the objects and load the data. Running oe_main.sql accomplishes the following tasks:
+
+Removes any previously installed OE schema
+Creates schema (user) OE and grants it the necessary privileges
+Connects as OE
+Calls the scripts that create and populate the schema objects
+After the oe_main.sql script runs successfully and schema OE is installed, you are connected as user OE. To verify that the schema was created, use the following command:
+
+SQL> SELECT table_name FROM user_tables;
+For a complete listing of the scripts and their functions, refer to Table 4-10.
+
+You can use scripts oe_drop.sql and oc_drop.sql to drop schema OE and subschema OC, respectively.
+
+Installing the PM Schema
+All scripts necessary to create the Product Media (PM) schema reside in $ORACLE_HOME/demo/schema/product_media.
+
+See Also:
+Guidelines for Installing Sample Schemas before you run pm_main.sql
+You need to call only one script, pm_main.sql, to create all the objects and load the data. Running pm_main.sql accomplishes the following tasks:
+
+Prompts for passwords and tablespace names used within the scripts as well as datafile and log file directories
+
+Removes any previously installed PM schema
+
+Creates user PM and grants it the necessary privileges
+
+Connects as PM
+
+Calls the scripts that create and populate the schema objects
+
+After script pm_main.sql runs successfully and schema PM is installed, you are connected as user PM. To verify that the schema was created, use the following command:
+
+SQL> SELECT table_name FROM user_tables;
+For a complete listing of the scripts and their functions, refer to Table 4-19 .
+
+You can use script pm_drop.sql to drop schema PM.
+
+Note:
+The SQL*Loader data file pm_p_lob.dat contains hard-coded absolute path names that have been set during installation. Before attempting to load the data in a different environment, you should first edit the path names in this file.
+Installing the IX Schema
+All scripts necessary to create the Information Exchange (IX) schema reside in $ORACLE_HOME/demo/schema/info_exchange.
+
+See Also:
+Guidelines for Installing Sample Schemas before you run ix_main.sql
+To install schema IX, you need to call only one script, ix_main.sql, which creates all the objects and loads the data.
+
+Running ix_main.sql accomplishes the following tasks:
+
+Prompts for passwords and tablespace names used within the scripts
+Removes any previously installed IX schema
+Creates user IX and grants the necessary privileges
+Connects as IX
+Calls the scripts that create and populate the schema objects
+After the ix_main.sql script runs successfully and schema IX is installed, you are connected as user IX. To verify that the schema was created, use the following command:
+
+SQL> SELECT table_name FROM user_tables;
+For a complete listing of the scripts and their functions, refer to Table 4-23.
+
+You can use script dix_v3.sql to drop schema IX.
+
+Installing the SH Schema
+All scripts necessary to create the Sales History (SH) schema reside in $ORACLE_HOME/demo/schema/sales_history.
+
+See Also:
+Guidelines for Installing Sample Schemas before you run sh_main.sql
+You need to call only one script, sh_main.sql, to create all the objects and load the data. Running sh_main.sql accomplishes the following tasks:
+
+Prompts for passwords and tablespace names used within the scripts as well as datafile and log file directories
+
+Removes any previously installed SH schema
+
+Creates user SH and grants the necessary privileges
+
+Connects as SH
+
+Calls the scripts that create and populate the schema objects
+
+After script sh_main.sql runs successfully and schema SH is installed, you are connected as user SH. To verify that the schema was created, use the following command:
+
+SQL> SELECT table_name FROM user_tables;
+For a complete listing of the scripts and their functions, refer to Table 4-27.
+
+Note:
+The dimension tables PROMOTIONS, CUSTOMERS, PRODUCTS and the fact table SALES are loaded by SQL*Loader, after which directory paths are created inside the database to point to the load and log file locations. This allows the loading of the COSTS table by using the external table sales_transactions_ext.
+A pair of optional scripts, sh_olp_c.sql and sh_olp_d.sql, is provided as a schema extension. To prepare schema SH for use with the advanced analytical capabilities of OLAP Services, run the sh_olp_c.sql create script. If you want to return to the initial setup of schema SH, then use script sh_olp_d.sql to undo the effects of sh_olp_c.sql and reinstate dimensions as they were before.
+
+You can use script sh_drop.sql to drop schema SH.
+
+Resetting Sample Schemas
+To reset sample schemas to their initial state, use the following syntax from the SQL*Plus command-line interface:
+
+@?/demo/schema/mksample systempwd syspwd hrpwd oepwd pmpwd ixpwd shpwd bipwd default_tablespace temp_tablespace log_file_directory/
+The mksample script expects 11 parameters. Provide the password for SYSTEM and SYS, and for schemas HR, OE, PM, IX, and SH. Specify a temporary and a default tablespace, and make sure to end the name of the log file directory with a trailing slash.
+
+The mksample script produces several log files:
+
+mkverify.log is the Sample Schema creation log file.
+hr_main.log is the HR schema creation log file.
+oe_oc_main.log is the OE schema creation log file.
+pm_main.log is the PM schema creation log file.
+pm_p_lob.log is the SQL*Loader log file for PM.PRINT_MEDIA.
+ix_main.log is the IX schema creation log file.
+sh_main.log is the SH schema creation log file.
+cust.log is the SQL*Loader log file for SH.CUSTOMERS.
+prod.log is the SQL*Loader log file for SH.PRODUCTS.
+promo.log is the SQL*Loader log file for SH.PROMOTIONS.
+sales.log is the SQL*Loader log file for SH.SALES.
+sales_ext.log is the external table log file for SH.COSTS.
+In most situations, there is no difference between installing a Sample Schema for the first time or reinstalling it over a previously installed version. The *_main.sql scripts drop the schema users and all of their objects.
+
+In some cases, complex interobject relationships in schema OE or IX prevent DROP USER ... CASCADE operations from completing normally. To correct these rare cases, use one of the following procedures:
+
+For the OC catalog subschema of schema OE:
+
+Connect as user OE.
+Run script oc_drop.sql.
+Connect as SYSTEM.
+Ensure that user OE is not connected:
+SELECT username FROM v$session;
+Drop user OE:
+DROP USER oe CASCADE;
+For the IX schemas:
+
+Connect as SYSTEM.
+
+Ensure that no user is connected as an IX user:
+
+SELECT username FROM v$session WHERE username like 'IX%';
+Drop the schemas by running script dix.sql. You will be prompted for passwords for the individual users.
+
+Uninstalling Sample Schemas
+If you need to remove the sample schemas from the installation, run script drop_sch.sql on the SQL*Plus command line. This script ships with Oracle Database.
+
+Example 2-1 How to Uninstall Sample Schemas
+
+@?/demo/schema/drop_sch.sql systempwd spool_file_name
+Script drop_sch.sql uses two parameters: systempwd is the password for SYSTEM user, and spool_file_name is the name of the spool file that captures the log of the operation.
