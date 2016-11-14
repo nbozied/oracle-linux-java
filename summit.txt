@@ -1,0 +1,13 @@
+conn sys/sys as sysdba
+
+CREATE USER summit IDENTIFIED BY summit;
+GRANT CONNECT,RESOURCE TO summit;
+GRANT CREATE VIEW,CREATE SESSION TO summit;
+GRANT CREATE ANY DIRECTORY TO summit;
+GRANT DBA TO summit; 
+
+conn summit/summit
+
+
+
+
